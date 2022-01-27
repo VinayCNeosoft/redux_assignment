@@ -1,0 +1,106 @@
+import React, { Component } from 'react'
+import axios from 'axios'
+
+class Products extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {proData:[],arrlen:'',cart:JSON.parse(localStorage.getItem('mycart')) }
+    }
+    mainCall=async()=>{
+        try{
+            const URL = "http://localhost:3001/products"
+            const res = await axios.get(URL)
+            this.setState({proData:res.data})
+            if(localStorage.getItem('mycart')!==null){
+                let arr=JSON.parse(localStorage.getItem('mycart'))
+                console.log("arr",arr);
+                let sum=0
+                arr.map((d)=>{
+                    sum=sum+d.quantity
+                    return sum
+                })
+                this.setState({arrlen:sum})
+            }
+            }
+            catch(err){
+                console.log(err)
+            }
+    }
+    componentDidMount=async()=>{
+        this.mainCall()
+    }
+
+    addCart=(id,quantity)=>{
+        if(localStorage.getItem('mycart')!==null)
+        {
+            let arr=JSON.parse(localStorage.getItem('mycart'))
+            console.log(arr)
+            if(arr.some(e=>e.id===id)){
+                arr.map((d)=>{
+                    if(d.id===id){
+                        return (d.quantity=d.quantity+1,quantity=d.quantity)
+                    }
+                    return arr
+                })
+                localStorage.setItem('mycart',JSON.stringify(arr))
+                alert('Quantity Added !')
+            }
+            else{
+                arr.push({id,quantity})
+                localStorage.setItem('mycart',JSON.stringify(arr))
+                alert('Product Added to Cart !')
+            }
+        }
+        else{
+            let arr=[{id,quantity}]
+            arr.push()
+            localStorage.setItem('mycart',JSON.stringify(arr))
+            alert('Product Added to Cart !')
+        }
+    }
+
+    displayCart=(event)=>{
+        event.preventDefault()
+        console.log(this.state.cart)
+        if(localStorage.getItem('mycart')!== null){
+            document.getElementById("carttable").style.visibility="visible";
+        }
+        else{
+            document.getElementById("carttable").style.visibility="hidden";
+        }
+    }
+    
+    render() {
+        return (
+            <>
+            <div>
+                {/* <nav className="nav navbar-dark bg-dark">
+                    <a className="nav-link" href=" ">Home</a>
+                    <a className="nav-link" href=" ">About</a>
+                    <a key={Math.random()} className="nav-link" href=" " onClick={()=>this.displayCart()}>
+                        Cart <span>{this.state.arrlen}</span>
+                    </a>
+                    <a key={Math.random()} className="nav-link" href=" ">Disabled</a>
+                </nav><br/> */}
+
+                <h1 key={Math.random()}>Products</h1><br/>
+                <div className="row container" key={Math.random()}>
+                    {this.state.proData.map(pro =>
+                        <div className="card-body col-sm-3 bg-light" key={Math.random()}>
+                        <img className="card-img-top" height="200px" width="200px" src={pro.images} alt="not found" 
+                        key={Math.random()}></img>
+                        <p className="card-title" key={Math.random()}>{pro.pname}</p>
+                        <p className="card-text" key={Math.random()}>
+                            Price:<span style={{color:"blue",fontSize:"large", fontWeight:"bold"}} 
+                            key={Math.random()}>${pro.price}</span>
+                        </p>
+                        <button key={Math.random()} href="" onClick={()=>this.addCart(pro.id,pro.quantity)}
+                        className="btn btn-success">Add to Cart</button>
+                        </div>)}
+                </div>
+            </div>
+            </>
+        )
+    }
+}
+export default Products
